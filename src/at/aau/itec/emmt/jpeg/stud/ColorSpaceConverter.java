@@ -15,22 +15,28 @@ public class ColorSpaceConverter implements ColorSpaceConverterI {
     public YUVImageI convertRGBToYUV(Image rgbImg) {
     	int height=rgbImg.getHeight(null);
     	int width=rgbImg.getWidth(null);
+    	YUVImage yimage=null;
     	int[] pixels = new int[width*height];
-    	int[][] yComp= new int[width][height];
-    	int[][] uComp= new int[width][height];
-    	int[][] vComp= new int[width][height];
+    	
     	PixelGrabber pg = new PixelGrabber(rgbImg, 0, 0, width, height, pixels, 0, width);
     	
     	
     	try {
             pg.grabPixels();
+            yimage=convert(pixels,width,height);
         } catch (InterruptedException e) {
             System.err.println("interrupted waiting for pixels!");
         }
-        if ((pg.getStatus() & ImageObserver.ABORT) != 0) {
-            System.err.println("image fetch aborted or errored");
-        }
-        for (int j = 0; j < height; j++) {
+        	
+        return yimage;
+    }
+    
+    private YUVImage convert(int[] pixels, int width, int height) {
+    	int[][] yComp= new int[width][height];
+    	int[][] uComp= new int[width][height];
+    	int[][] vComp= new int[width][height];
+    	
+    	for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
                 int red=(pixels[j * width + i]>>16) & 0xff;
                 int green=(pixels[j * width + i]>>8) & 0xff;
@@ -43,17 +49,12 @@ public class ColorSpaceConverter implements ColorSpaceConverterI {
                 vComp[j][i]=v;
             }
         }
-        Component Y= new Component(yComp,YUVImage.Y_COMP);
-    	Component U= new Component(uComp,YUVImage.CB_COMP);
-    	Component V= new Component(vComp,YUVImage.CR_COMP);
     	
-        return new YUVImage(Y,U,V,SubSamplerI.YUV_444);
+    	Component Y= new Component(yComp,YUVImage.Y_COMP);
+     	Component U= new Component(uComp,YUVImage.CB_COMP);
+     	Component V= new Component(vComp,YUVImage.CR_COMP);
+    	
+    	return new YUVImage(Y,U,V,SubSamplerI.YUV_444);
     }
-    /*public void handlesinglepixel(int x, int y, int pixel) {
-        int red   = (pixel >> 16) & 0xff;
-        int green = (pixel >>  8) & 0xff;
-        int blue  = (pixel      ) & 0xff;
-        // Deal with the pixel as necessary...
-   }*/
 
 }
