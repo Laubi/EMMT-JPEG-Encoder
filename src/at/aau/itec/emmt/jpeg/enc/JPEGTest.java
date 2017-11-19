@@ -7,6 +7,7 @@ import at.aau.itec.emmt.jpeg.stud.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 
 /**
@@ -81,18 +82,18 @@ public class JPEGTest {
          * Exercise 3--
         --Exercise 3 */
 
-        //DCTI dct = new StandardDCT();
-        //QuantizationI quantizer = new Quantizer(qualityFactor);
+        DCTI dct = new StandardDCT();
+        QuantizationI quantizer = new Quantizer(qualityFactor);
         
         /**
          * Exercise 4--
         --Exercise 4 */
-        //EntropyCoderI entropyCoder = new HuffmanCoder();
+        EntropyCoderI entropyCoder = new HuffmanCoder();
         
         /**
          * Exercise 3 and Exercise 4--
        --Exercise 3 and Exercise 4 */
-       /* for (int i=0;i < minCodedUnits.length;i++) {
+       for (int i=0;i < minCodedUnits.length;i++) {
             System.out.print("\nProcessing MCU: " + i);
             RegionI[] regions = minCodedUnits[i].getRegions();
             for (int j=0; j < regions.length;j++) {
@@ -119,7 +120,7 @@ public class JPEGTest {
                     System.out.print("\n    -------------------------------");
                 }
             }
-        }*/
+        }
      }
 
     private static int getSamplingRatio(String ratio) {
