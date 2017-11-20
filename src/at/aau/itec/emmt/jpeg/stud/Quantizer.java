@@ -5,11 +5,17 @@ import at.aau.itec.emmt.jpeg.impl.YUVImage;
 import at.aau.itec.emmt.jpeg.spec.BlockI;
 import at.aau.itec.emmt.jpeg.spec.DCTBlockI;
 import at.aau.itec.emmt.jpeg.spec.QuantizationI;
+import at.aau.itec.emmt.jpeg.spec.YUVImageI;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 public class Quantizer implements QuantizationI {
 
+    @SuppressWarnings("WeakerAccess")
     protected int qualityFactor;
 
+    @SuppressWarnings("unused")
     public Quantizer() {
         this(DEFAULT_QUALITY_FACTOR);
     }
@@ -20,46 +26,27 @@ public class Quantizer implements QuantizationI {
 
     @Override
     public int[] getQuantumLuminance() {
-        /** The normative quantization matrix for luminance blocks. **/
-        int[] quant_lum = QuantizationI.QUANTUM_LUMINANCE;
-        int qualityFactorScaled = 0;
-        if (qualityFactor < 50) {
-            qualityFactorScaled = 5000 / qualityFactor;
-        } else {
-            qualityFactorScaled = 200 - 2 * qualityFactor;
-        }
-        for (int i = 0; i < quant_lum.length; i++) {
-            quant_lum[i] = Math.min(255, Math.max(1, (quant_lum[i] * qualityFactorScaled + 50) / 100));
-        }
-        return quant_lum;
+        return calculateWithQualityFactor(QuantizationI.QUANTUM_LUMINANCE);
     }
 
     @Override
     public int[] getQuantumChrominance() {
-        /** The normative quantization matrix for chrominace blocks. **/
-        int[] quant_chrom = QuantizationI.QUANTUM_CHROMINANCE;
-        int qualityFactorScaled = 0;
-        if (qualityFactor < 50) {
-            qualityFactorScaled = 5000 / qualityFactor;
-        } else {
-            qualityFactorScaled = 200 - 2 * qualityFactor;
-        }
-        for (int i = 0; i < quant_chrom.length; i++) {
-            quant_chrom[i] = Math.min(255, Math.max(1, (quant_chrom[i] * qualityFactorScaled + 50) / 100));
-        }
-        return quant_chrom;
+        return calculateWithQualityFactor(QuantizationI.QUANTUM_CHROMINANCE);
+    }
+
+    private int[] calculateWithQualityFactor(final int[] input){
+        final int qualityFactorScaled = qualityFactor < 50 ? 5000 / qualityFactor : 200 - 2 * qualityFactor;
+
+        return Arrays.stream(input).map(i -> Math.min(255, Math.max(1, (i * qualityFactorScaled + 50) / 100))).toArray();
     }
 
     @Override
     public BlockI quantizeBlock(DCTBlockI dctBlock, int compType) {
-        int[] quant;
+        final double[][] block = dctBlock.getData();
+        final int[] quant = compType == YUVImageI.Y_COMP ? this.getQuantumLuminance() : this.getQuantumChrominance();
+
         int[][] dataMatrix = new int[8][8];
-        double[][] block = dctBlock.getData();
-        if (compType == YUVImage.Y_COMP) {
-            quant = this.getQuantumLuminance();
-        } else {
-            quant = this.getQuantumChrominance();
-        }
+
         for (int i = 0; i < block.length; i++) {
             for (int j = 0; j < block.length; j++) {
                 dataMatrix[i][j] = (int) Math.round(block[i][j] / quant[i * 8 + j]);
