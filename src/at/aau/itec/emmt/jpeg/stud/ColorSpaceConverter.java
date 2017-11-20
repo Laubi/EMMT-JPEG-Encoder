@@ -48,7 +48,7 @@ public class ColorSpaceConverter implements ColorSpaceConverterI {
                 int blue = c.getBlue();
 
                 yComp[y][x] = (int) (0.299 * red + 0.587 * green + 0.114 * blue);       // Y
-                uComp[y][x] = (int) (128 - 0.1687 * red - 0.3313 * green + 0.5 * blue); // U
+                uComp[y][x] = (int) Math.ceil(128 - 0.1687 * red - 0.3313 * green + 0.5 * blue); // U
                 vComp[y][x] = (int) (128 + 0.5 * red - 0.4187 * green - 0.0813 * blue); // V
             }
         }
